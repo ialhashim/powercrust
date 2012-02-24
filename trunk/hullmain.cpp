@@ -41,6 +41,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#include <string>
+
 #include "getopt.h"
 
 #define POINTSITES 1
@@ -759,7 +761,13 @@ int main(int argc, char **argv) {
     fprintf(HEAD,"OFF\n"); 
     fprintf(HEAD,"%d %d %d\n",num_vtxs,num_faces,0);
     efclose(HEAD);
-    system("cat head pc pnf > pc.off");
+
+#ifdef WIN32
+	system("type head pc pnf > pc.off");  
+#else
+	system("cat head pc pnf > pc.off");  
+#endif
+
     system("rm head pc pnf");
 
  
@@ -773,21 +781,37 @@ int main(int argc, char **argv) {
     fprintf(HEAD,"%d %d %d\n",num_poles,num_axedgs,0);
     efclose(HEAD);
     efclose(AXIS);
-    system("cat head pole axis > axis.off");
-      
+#ifdef WIN32
+	system("type head pole axis > axis.off"); 
+#else
+	system("cat head pole axis > axis.off");
+#endif
+ 
     HEAD=fopen("head","w");
     fprintf(HEAD,"%d %d \n", num_poles,num_axedgs);
     efclose(HEAD);
 
-    system("cat head tpoleinfo axis > poleinfo");          
 
+#ifdef WIN32
+	system("type head tpoleinfo axis > poleinfo");  
+#else
+	system("cat head tpoleinfo axis > poleinfo");  
+#endif
     
     HEAD = fopen("head","w");
     fprintf(HEAD,"OFF\n"); 
     fprintf(HEAD,"%d %d %d\n",num_poles,num_axfaces,0);
     efclose(HEAD);
     efclose(AXISFACE);
-    system("cat head pole axisface > axisface.off");
+
+
+#ifdef WIN32
+	system("type head pole axisface > axisface.off");
+#else
+	system("cat head pole axisface > axisface.off");
+#endif
+
+
     system("rm -f head pole axis axisface tpoleinfo sp");
     /* power shape output done */
     
@@ -797,14 +821,10 @@ int main(int argc, char **argv) {
     efclose(TFILE);
     free(adjlist);
      
-        
-    
     free_hull_storage();
     efclose(DFILE);
     exit(0);
 }
-
-
 
 
 
