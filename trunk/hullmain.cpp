@@ -352,6 +352,21 @@ void make_output(simplex *root,
     /*  efclose(F); */
 }
 
+bool strequals(const std::string& a, const std::string& b)
+{
+	unsigned int sz = a.size();
+	if (b.size() != sz)
+		return false;
+	for (unsigned int i = 0; i < sz; ++i)
+		if (tolower(a[i]) != tolower(b[i]))
+			return false;
+	return true;
+}
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
 int main(int argc, char **argv) {
 
     long    seed = 0, poleid=0;
@@ -365,9 +380,9 @@ int main(int argc, char **argv) {
         ;
     int option, num_poles=0;
     double  pole_angle;
-    char    ofile[50] = "",
-        ifile[50] = "",
-        ofilepre[50] = "";
+    char    ofile[256] = "",
+        ifile[256] = "",
+        ofilepre[256] = "";
     FILE *INPOLE, *OUTPOLE, *HEAD,*POLEINFO;
     int main_out_form=0, i,k;
 
@@ -405,7 +420,54 @@ int main(int argc, char **argv) {
             bad = 1; 
             break;
         case 'i' :
-            strcpy(ifile, optarg);
+            {
+				std::string filename = optarg;
+				std::string ext = filename.substr(filename.length() - 3, 3);
+
+				if( strequals( ext, "off" ) )
+				{
+					// Generate .pts file instead
+					std::ifstream in(filename);
+					std::ofstream out(filename + ".pts");
+
+					std::string line;
+					int nv = 0, nf = 0, ne = 0;
+					in >> line;
+					in >> nv >> nf >> ne;
+
+					for(int i = 0; i < nv; i++)
+					{
+						double x,y,z;
+						in >> x >> y >> z;
+						out << x << " " << y << " " << z << "\n";
+					}
+					
+					in.close();
+					out.close();
+
+					strcpy(ifile, (filename + ".pts").c_str());
+				}
+				else if( strequals( ext, "xyz" ) )
+				{
+					// Generate .pts file instead
+					std::ifstream in(filename);
+					std::ofstream out(filename + ".pts");
+
+					while(!in.eof())
+					{
+						double x,y,z,nx,ny,nz;
+						in >> x >> y >> z >> nx >> ny >> nz;
+						out << x << " " << y << " " << z << "\n";
+					}
+
+					in.close();
+					out.close();
+
+					strcpy(ifile, (filename + ".pts").c_str());
+				}
+				else
+					strcpy(ifile, optarg);
+			}
             break;
         case 'X' : 
             DFILE = efopen(optarg, "w");
